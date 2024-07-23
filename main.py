@@ -1,4 +1,4 @@
-class TestClass:
+class TestCase:
     def __init__(self, name):
         self.name = name
     def run(self):
@@ -6,17 +6,22 @@ class TestClass:
         method()
 
 
-class WasRun(TestClass):
+class WasRun(TestCase):
     def __init__(self, name):
         self.wasRun = None
-        TestClass.__init__(self, name)
+        TestCase.__init__(self, name)
 
     def testMethod(self):
         self.wasRun = 1
 
 
+class TestCaseTest(TestCase):
+    def testRunning(self):
+        test = WasRun("testMethod")
+        assert (not test.wasRun)
+        test.run()
+        assert (test.wasRun)
+
+
 if __name__ == '__main__':
-    test = WasRun("testMethod")
-    print(test.wasRun)
-    test.run()
-    print(test.wasRun)
+    TestCaseTest("testRunning").run()
