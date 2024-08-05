@@ -5,8 +5,11 @@ class TestCase:
         result = TestResult()
         result.testStarted()
         self.setUp()
-        method = getattr(self, self.name)
-        method()
+        try:
+            method = getattr(self, self.name)
+            method()
+        except:
+            result.testFailed()
         self.tearDown()
         return result
 
@@ -19,12 +22,16 @@ class TestCase:
 class TestResult:
     def __init__(self):
         self.runCount = 0
+        self.errorCount = 0
 
     def testStarted(self):
         self.runCount += 1
 
     def summary(self):
-        return "%d run, 0 failed" % self.runCount
+        return "%d run, %d failed" % (self.runCount, self.errorCount)
+
+    def testFailed(self):
+        self.errorCount += 1
 
 
 class WasRun(TestCase):
@@ -55,12 +62,20 @@ class TestCaseTest(TestCase):
         result = test.run()
         assert ("1 run, 0 failed" == result.summary())
 
+    def testFailedResultFormatting(self):
+        test = TestResult()
+        test.testStarted()
+        test.testFailed()
+        assert ("1 run, 1 failed" == test.summary())
+
     def testFailedResult(self):
         test = WasRun("testBrokenMethod")
         result = test.run()
         assert ("1 run, 1 failed" == result.summary())
 
+
 if __name__ == '__main__':
     TestCaseTest("testTemplateMethod").run()
     TestCaseTest("testResult").run()
+    TestCaseTest("testFailedResultFormatting").run()
     TestCaseTest("testFailedResult").run()
