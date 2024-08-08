@@ -1,8 +1,7 @@
 class TestCase:
     def __init__(self, name):
         self.name = name
-    def run(self):
-        result = TestResult()
+    def run(self, result):
         result.testStarted()
         self.setUp()
         try:
@@ -11,7 +10,6 @@ class TestCase:
         except:
             result.testFailed()
         self.tearDown()
-        return result
 
     def setUp(self):
         pass
@@ -50,6 +48,15 @@ class WasRun(TestCase):
     def testBrokenMethod(self):
         raise Exception
 
+class TestSuite:
+    def __init__(self):
+        self.tests = []
+    def add(self, test):
+        self.tests.append(test)
+
+    def run(self, result):
+        for test in self.tests:
+            test.run(result)
 
 class TestCaseTest(TestCase):
     def testTemplateMethod(self):
@@ -73,9 +80,21 @@ class TestCaseTest(TestCase):
         result = test.run()
         assert ("1 run, 1 failed" == result.summary())
 
+    def testSuite(self):
+        suite = TestSuite()
+        suite.add(WasRun("testMethod"))
+        suite.add(WasRun("testBrokenMethod"))
+        result = TestResult()
+        suite.run(result)
+        assert ("2 run, 1 failed" == result.summary())
 
 if __name__ == '__main__':
-    TestCaseTest("testTemplateMethod").run()
-    TestCaseTest("testResult").run()
-    TestCaseTest("testFailedResultFormatting").run()
-    TestCaseTest("testFailedResult").run()
+    suite = TestSuite()
+    suite.add(TestCaseTest("testTemplateMethod"))
+    suite.add(TestCaseTest("testResult"))
+    suite.add(TestCaseTest("testFailedResultFormatting"))
+    suite.add(TestCaseTest("testFailedResult"))
+    suite.add(TestCaseTest("testSuite"))
+    result = TestResult()
+    suite.run(result)
+    print(result.summary())
