@@ -1,6 +1,7 @@
 class TestCase:
     def __init__(self, name):
         self.name = name
+
     def run(self, result):
         result.testStarted()
         self.setUp()
@@ -16,6 +17,7 @@ class TestCase:
 
     def tearDown(self):
         pass
+
 
 class TestResult:
     def __init__(self):
@@ -48,9 +50,11 @@ class WasRun(TestCase):
     def testBrokenMethod(self):
         raise Exception
 
+
 class TestSuite:
     def __init__(self):
         self.tests = []
+
     def add(self, test):
         self.tests.append(test)
 
@@ -58,38 +62,38 @@ class TestSuite:
         for test in self.tests:
             test.run(result)
 
+
 class TestCaseTest(TestCase):
+    def setUp(self):
+        self.result = TestResult()
+
     def testTemplateMethod(self):
         test = WasRun("testMethod")
-        result = TestResult()
-        test.run(result)
+        test.run(self.result)
         assert ("setUp testMethod tearDown " == test.log)
 
     def testResult(self):
         test = WasRun("testMethod")
-        result = TestResult()
-        test.run(result)
-        assert ("1 run, 0 failed" == result.summary())
+        test.run(self.result)
+        assert ("1 run, 0 failed" == self.result.summary())
 
     def testFailedResultFormatting(self):
-        test = TestResult()
-        test.testStarted()
-        test.testFailed()
-        assert ("1 run, 1 failed" == test.summary())
+        self.result.testStarted()
+        self.result.testFailed()
+        assert ("1 run, 1 failed" == self.result.summary())
 
     def testFailedResult(self):
         test = WasRun("testBrokenMethod")
-        result = TestResult()
-        test.run(result)
-        assert ("1 run, 1 failed" == result.summary())
+        test.run(self.result)
+        assert ("1 run, 1 failed" == self.result.summary())
 
     def testSuite(self):
         suite = TestSuite()
         suite.add(WasRun("testMethod"))
         suite.add(WasRun("testBrokenMethod"))
-        result = TestResult()
-        suite.run(result)
-        assert ("2 run, 1 failed" == result.summary())
+        suite.run(self.result)
+        assert ("2 run, 1 failed" == self.result.summary())
+
 
 if __name__ == '__main__':
     suite = TestSuite()
